@@ -1,10 +1,7 @@
 #include <argv/argv.h>
+#include "cmd-args.h"
 
 #include <stdlib.h>
-
-struct cmd_args {
- cmd_option *options;
-};
 
 cmd_args *argv_init(void) {
   cmd_args *args = calloc(1, sizeof(cmd_args));
