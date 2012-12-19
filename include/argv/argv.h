@@ -9,9 +9,16 @@ typedef struct cmd_args cmd_args;
 cmd_args *argv_init(void);
 void argv_free(cmd_args *args);
 
-void argv_parse(cmd_args *args, int argc, const char **argv);
+typedef enum {
+  ARGV_OK = 0,
+  ARGV_UNEXPECTED_TOKEN,
+  ARGV_VALUE_EXPECTED,
+  ARGV_UNDEFINED_PARAMETER
+} argv_parse_error;
+int argv_parse(cmd_args *args, int argc, const char **argv);
 
 cmd_option *argv_option_iterate(cmd_args *args);
+void argv_option_iterate_reset(cmd_args *args);
 const char **argv_values(cmd_args *args);
 
 void argv_usage_print(cmd_args *);

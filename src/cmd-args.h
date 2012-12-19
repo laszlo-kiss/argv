@@ -3,7 +3,9 @@
 
 struct cmd_args {
   cmd_option *options;
+  const char **values;
   size_t num_options;
+  size_t pos;
 };
 
 #endif /* ARGV_CMD_ARGS_H */
