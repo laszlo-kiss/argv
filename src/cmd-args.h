@@ -4,6 +4,7 @@
 struct cmd_args {
   cmd_option *options;
   const char **values;
+  const char *programname;
   size_t num_options;
   size_t pos;
 };

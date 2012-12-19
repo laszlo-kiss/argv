@@ -51,7 +51,15 @@ static unsigned char is_end_of_parameters(char *value, int length) {
   return length == 2 && value[0] == '-' && value[1] == '-' ? 0 : 0;
 }
 
-void argv_parse(cmd_args *args, int argc, const char **argv) {
+int argv_parse(cmd_args *args, int argc, const char **argv) {
+  if(argc < 0) {
+    return ARGV_EMPTY;
+  }
+
+  return argv_parse_partially(args, argv[0], argc - 1, argv + 1);
+}
+
+int argv_parse_partially(cmd_args *args, const char *programname, int argc, const char **argv) {
   cmd_option *option;  
   char *current;
   int length = 0;
@@ -60,6 +68,8 @@ void argv_parse(cmd_args *args, int argc, const char **argv) {
   unsigned char is_param;
   cmd_args *current_option;
   argv_option_iterate_reset(args);
+
+  args->programname = programname;
 
   for(pos = 0; pos < argc; pos++) {
     current = argv[pos];
@@ -104,6 +114,8 @@ void argv_parse(cmd_args *args, int argc, const char **argv) {
   } else {
     args_init_values(args);
   }
+
+  return ARGV_OK;
 }
 
 const char **argv_values(cmd_args *args) {
