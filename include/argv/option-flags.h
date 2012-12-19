@@ -5,6 +5,6 @@ typedef enum {
   ARGV_OPTION_VALUE = 0x00000001,
   ARGV_OPTION_OPTIONAL_VALUE = 0x00000003,
   ARGV_OPTION_REQUIRED = 0x00000010
-} argv_option_flags;
+} argv_option_flag;
 
 #endif /* ARGV_OPTION_FLAGS_H */

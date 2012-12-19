@@ -6,7 +6,7 @@
 struct cmd_args;
 typedef struct cmd_args cmd_args; 
 
-cmd_args *argv_init();
+cmd_args *argv_init(void);
 void argv_free(cmd_args *args);
 
 void argv_parse(cmd_args *args, int argc, const char **argv);
