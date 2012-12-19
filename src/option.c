@@ -1,23 +1,7 @@
 #include <argv/option.h>
 #include <argv/argv.h>
 #include "cmd-args.h"
-
-struct cmd_option {
-  // parmeter naming
-  char shortname;
-  const char *longname;
-
-  // parameter value
-  const char *default_value;
-  const char *value;
-
-  // parameter type
-  int flags;
-
-  // parameter info (for --help dialog)
-  const char *description;
-  const char *value_type_description;
-};
+#include "cmd-option.h"
 
 static cmd_option *argv_init_option(cmd_args *args) {
   args->options = realloc(args->options, sizeof(cmd_option) * ++args->num_options);
