@@ -48,3 +48,11 @@ unsigned char argv_option_given(cmd_option *option) {
 const char *argv_option_value(cmd_option *option) {
   return option->value;
 }
+
+unsigned char argv_option_needs_value(cmd_option *option) {
+  return option->flags & ARGV_OPTION_VALUE;
+}
+
+unsigned char argv_option_required(cmd_option *option) {
+  return option->flags & ARGV_OPTION_REQUIRED;
+}
