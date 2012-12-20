@@ -52,9 +52,9 @@ const char *argv_option_value(cmd_option *option) {
 }
 
 unsigned char argv_option_needs_value(cmd_option *option) {
-  return option->flags & ARGV_OPTION_VALUE;
+  return option->flags & ARGV_OPTION_VALUE ? 1 : 0;
 }
 
 unsigned char argv_option_required(cmd_option *option) {
-  return option->flags & ARGV_OPTION_REQUIRED;
+  return option->flags & ARGV_OPTION_REQUIRED ? 1 : 0;
 }
