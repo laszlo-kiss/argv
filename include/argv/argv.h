@@ -23,8 +23,4 @@ cmd_option *argv_option_iterate(cmd_args *args);
 void argv_option_iterate_reset(cmd_args *args);
 const char **argv_values(cmd_args *args);
 
-void argv_usage_print(cmd_args *);
-void argv_help_print(cmd_args *);
-
-
 #endif /* ARGV_ARGV_H */
