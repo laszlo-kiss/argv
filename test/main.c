@@ -1,6 +1,14 @@
 #include <stdlib.h>
 #include <check.h>
-#include "check-argv.h"
+#include "test-argv.h"
+#include "test-option.h"
+
+Suite *argv_suite() {
+  Suite *s = suite_create("argv");
+  suite_add_tcase(s, argv_tcase());
+  suite_add_tcase(s, option_tcase());
+  return s;
+}
 
 int main(void) {
   int number_failed;
