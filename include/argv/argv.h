@@ -21,6 +21,8 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
 
 cmd_option *argv_option_iterate(cmd_args *args);
 void argv_option_iterate_reset(cmd_args *args);
-const char **argv_values(cmd_args *args);
+const char **argv_values(cmd_args *args, size_t *size);
+const char *argv_values_iterate(cmd_args *args);
+void argv_values_iterate_reset(cmd_args *args);
 
 #endif /* ARGV_ARGV_H */

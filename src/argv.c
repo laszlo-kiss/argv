@@ -6,11 +6,6 @@
 #include "cmd-option.h"
 
 
-static void args_init_values(cmd_args *args) {
-  static const char *c = "";
-  args->values = &c;
-}
-
 cmd_args *argv_init(void) {
   cmd_args *args = calloc(1, sizeof(cmd_args));
   assert(args != NULL /* calloc() worked? */);
@@ -18,7 +13,9 @@ cmd_args *argv_init(void) {
   args->options = NULL;
   args->num_options = 0;
   args->pos = 0;
-  args_init_values(args);
+  args->values = NULL;
+  args->num_values = 0;
+  args->values_pos = 0;
 
   return args;
 }
@@ -32,7 +29,7 @@ void argv_free(cmd_args *args) {
 cmd_option *argv_option_iterate(cmd_args *args) {
   cmd_option *option = NULL;
   if(args->pos < args->num_options) {
-    return &args->options[args->pos++];
+    option = &args->options[args->pos++];
   }
   return option;
 }
@@ -111,16 +108,30 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
     }
   }
 
-  if(pos < argc) {
+  if(pos + 1 < argc) {
     args->values = &argv[pos];
+    args->num_values = argc - (pos + 1);
   } else {
-    args_init_values(args);
+    args->values = NULL;
+    args->num_values = 0;
   }
 
   return ARGV_OK;
 }
 
-const char **argv_values(cmd_args *args) {
+const char **argv_values(cmd_args *args, size_t *size) {
+  *size = args->num_values;
   return args->values;
 }
 
+const char *argv_values_iterate(cmd_args *args) {
+  const char *value = NULL;
+  if(args->values_pos < args->num_values) {
+    value = args->values[args->values_pos++];
+  }
+  return value;
+}
+
+void argv_values_iterate_reset(cmd_args *args) {
+  args->values_pos = 0;
+}
