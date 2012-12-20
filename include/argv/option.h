@@ -4,7 +4,7 @@
 #include "option-flags.h"
 #include "struct-names.h"
 
-cmd_option *argv_option_register(cmd_args *args, char shortname, char *longname, int flags);
+cmd_option *argv_option_register(cmd_args *args, char shortname, const char *longname, int flags);
 
 void argv_option_set_default_value(cmd_option *option, const char *default_value);
 void argv_option_set_description(cmd_option *option, const char *description);
