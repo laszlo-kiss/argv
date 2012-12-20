@@ -2,9 +2,8 @@
 #define ARGV_ARGV_H
 
 #include "option.h"
+#include "struct-names.h"
 
-struct cmd_args;
-typedef struct cmd_args cmd_args; 
 
 cmd_args *argv_init(void);
 void argv_free(cmd_args *args);
