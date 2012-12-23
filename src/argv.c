@@ -48,11 +48,11 @@ static unsigned char is_parameter(const char *value, int length) {
 }
 
 static unsigned char is_long_parameter(const char *value, int length) {
-  return length > 2 && value[0] == '-' ? 1 : 0;
+  return length > 2 && value[0] == '-' && value[1] == '-' ? 1 : 0;
 }
 
 static unsigned char is_end_of_parameters(const char *value, int length) {
-  return length == 2 && value[0] == '-' && value[1] == '-' ? 0 : 0;
+  return length == 2 && value[0] == '-' && value[1] == '-' ? 1 : 0;
 }
 
 int argv_parse(cmd_args *args, int argc, const char **argv) {
