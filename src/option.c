@@ -6,9 +6,9 @@
 #include "cmd-option.h"
 
 static cmd_option *argv_init_option(cmd_args *args) {
-  args->options = realloc(args->options, sizeof(cmd_option) * ++args->num_options);
+  args->options = realloc(args->options, sizeof(cmd_option*) * ++args->num_options);
   assert(args->options != NULL /* realloc() worked ? */);
-  cmd_option *option = &args->options[args->num_options - 1];
+  cmd_option *option = args->options[args->num_options - 1] = calloc(1, sizeof(cmd_option));
 
   // initialization
   option->shortname = '\0';

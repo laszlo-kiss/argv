@@ -21,6 +21,12 @@ cmd_args *argv_init(void) {
 
 void argv_free(cmd_args *args) {
   if(args != NULL) {
+    cmd_option *option;
+    argv_option_iterate_reset(args);
+    while(NULL != (option = argv_option_iterate(args))) {
+      free(option);
+    }
+    free(args->options);
     free(args);
   }
 }
@@ -28,7 +34,7 @@ void argv_free(cmd_args *args) {
 cmd_option *argv_option_iterate(cmd_args *args) {
   cmd_option *option = NULL;
   if(args->pos < args->num_options) {
-    option = &args->options[args->pos++];
+    option = args->options[args->pos++];
   }
   return option;
 }
