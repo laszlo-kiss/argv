@@ -5,7 +5,6 @@
 #include "cmd-args.h"
 #include "cmd-option.h"
 
-
 cmd_args *argv_init(void) {
   cmd_args *args = calloc(1, sizeof(cmd_args));
   assert(args != NULL /* calloc() worked? */);
@@ -51,7 +50,7 @@ static unsigned char is_end_of_parameters(const char *value, int length) {
 }
 
 int argv_parse(cmd_args *args, int argc, const char **argv) {
-  if(argc < 0) {
+  if(argc <= 0) {
     return ARGV_EMPTY;
   }
 
@@ -62,7 +61,7 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
   cmd_option *option;  
   const char *current;
   int length = 0;
-  int pos;
+  int pos, expect_no_more_parameters = -1;
   unsigned char expect_value = 0;
   unsigned char is_param;
   cmd_option *current_option;
@@ -76,7 +75,7 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
     is_param = is_parameter(current, length);
 
     if(!is_param && !expect_value) {
-      return ARGV_UNEXPECTED_TOKEN;
+      expect_no_more_parameters = pos;
     }
 
     if(is_param && expect_value) {
@@ -84,10 +83,15 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
     }
 
     if(is_param) {
+      if(expect_no_more_parameters > 0) {
+        return ARGV_UNEXPECTED_TOKEN;
+      }
       current_option = NULL;
       if(is_end_of_parameters(current, length)) {
+        expect_no_more_parameters = pos;
         break;
       }
+      argv_option_iterate_reset(args);
       while(NULL != (option = argv_option_iterate(args))) {
         if((is_long_parameter(current, length)
             && option->longname != NULL
@@ -98,19 +102,23 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
             && current[1] == option->shortname
           )) {
           current_option = option;
+          break;
         }
       }
       if(current_option == NULL) {
         return ARGV_UNDEFINED_PARAMETER;
+      } else {
+        expect_value = argv_option_needs_value(current_option);
       }
     } else {
       option->value = current;
+      expect_value = 0;
     }
   }
 
-  if(pos + 1 < argc) {
-    args->values = &argv[pos];
-    args->num_values = argc - (pos + 1);
+  if(expect_no_more_parameters >= 0) {
+    args->values = &argv[expect_no_more_parameters];
+    args->num_values = expect_no_more_parameters - (pos + 1);
   } else {
     args->values = NULL;
     args->num_values = 0;

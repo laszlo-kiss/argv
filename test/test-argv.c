@@ -46,11 +46,21 @@ START_TEST(test_argv_option_iterate) {
 }
 END_TEST
 
+START_TEST(test_argv_parse_partially_argv_ok) {
+  char *str_args[] = {
+    "-v",
+    "-f",
+    "file.txt",
+  };
+  fail_unless(ARGV_OK == argv_parse_partially(args, "testprogram", 3, str_args), "argv_parse_partially parses correct arguements correctly");
+} END_TEST
+
 TCase *argv_tcase(void) {
   TCase *tc = tcase_create("argv");
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_add_test(tc, test_argv_init);
   tcase_add_test(tc, test_argv_option_iterate);
+  tcase_add_test(tc, test_argv_parse_partially_argv_ok);
   return tc;
 }
 
