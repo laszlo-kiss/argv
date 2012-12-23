@@ -5,8 +5,17 @@
 #include "cmd-args.h"
 #include "cmd-option.h"
 
+
+void argv_help_print(cmd_args *args) {
+  argv_help_print_to(args, stdout);
+}
+
 void argv_usage_print(cmd_args *args) {
-  printf("Usage: %s", args->programname);
+  argv_help_print_to(args, stdout);
+}
+
+void argv_help_print_to(cmd_args *args, FILE *out) {
+  fprintf(out, "Usage: %s", args->programname);
   cmd_option *option;
   unsigned char required;
   unsigned char has_value;
@@ -18,7 +27,7 @@ void argv_usage_print(cmd_args *args) {
     if(name == NULL) {
       name = &option->shortname;
     }
-    printf(" %s%s%s%s%s",
+    fprintf(out, " %s%s%s%s%s",
       required ? "" : "[ ",
       name, has_value ? " " : "",
       has_value ? option->value_type_description : "",
@@ -26,13 +35,13 @@ void argv_usage_print(cmd_args *args) {
   }
 }
 
-void argv_help_print(cmd_args *args) {
+void argv_usage_print_to(cmd_args *args, FILE *out) {
   const char *name;
   unsigned char both;
   unsigned char is_longname;
   char dynamic_format[21] = {};
   cmd_option *option;
-  printf("Parameters:\n");
+  fprintf(out, "Parameters:\n");
   while(NULL != (option = argv_option_iterate(args))) {
     name = option->longname;
     is_longname = 1;
@@ -47,12 +56,12 @@ void argv_help_print(cmd_args *args) {
     if(option->description != NULL)  {
       if(!both) {
         snprintf(dynamic_format, 20, "  %s%%-%is", is_longname ? "--" : "-", is_longname ? 19 : 20);
-        printf(dynamic_format, name);
+        fprintf(out, dynamic_format, name);
       } else {
         snprintf(dynamic_format, 20, "  --%%-%is, -%%c", strlen(option->longname));
-        printf(dynamic_format, option->longname, option->shortname);
+        fprintf(out, dynamic_format, option->longname, option->shortname);
       }
-      printf("%s\n", option->description);
+      fprintf(out, "%s\n", option->description);
     }
   }
 }
