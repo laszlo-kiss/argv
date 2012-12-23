@@ -1,14 +1,18 @@
 #include <check.h>
 #include <argv/argv.h>
+#include <argv/help-output.h>
 #include "test-argv.h"
 
 cmd_args *args;
+cmd_option *verbose_option;
+cmd_option *file_option;
+cmd_option *output_option;
 
 static void setup(void) {
   args = argv_init();
-  argv_option_register(args, 'v', "verbose", ARGV_OPTION_FLAG);
-  argv_option_register(args, 'f', "file", ARGV_OPTION_VALUE | ARGV_OPTION_REQUIRED);
-  argv_option_register(args, 'o', "output", ARGV_OPTION_VALUE);
+  verbose_option = argv_option_register(args, 'v', NULL, ARGV_OPTION_FLAG);
+  file_option = argv_option_register(args, 0, "file", ARGV_OPTION_VALUE | ARGV_OPTION_REQUIRED);
+  output_option = argv_option_register(args, 'o', "output", ARGV_OPTION_VALUE);
 }
 
 static void teardown(void) {
@@ -94,6 +98,18 @@ START_TEST(test_argv_parse_partially_unexpected_token) {
   fail_unless(ARGV_UNEXPECTED_TOKEN == argv_parse_partially(args, "testprogram", 5, str_args), "argv_parse_partially returns UNEXPECTED_TOKEN");
 } END_TEST
 
+START_TEST(test_argv_usage_print) {
+  argv_option_set_description(verbose_option, "be more verbose");
+  argv_option_set_description(file_option, "name of the input file");
+  argv_option_set_description(output_option, "name of the output file");
+  char *buffer[1024] = {};
+  FILE *handle = fmemopen(buffer, 1024, "a");
+  argv_parse_partially(args, "program", 0, NULL);
+  argv_help_print_to(args, handle);
+  argv_help_print(args);
+  fclose(handle);
+} END_TEST
+
 TCase *argv_tcase(void) {
   TCase *tc = tcase_create("argv");
   tcase_add_checked_fixture(tc, setup, teardown);
@@ -102,6 +118,7 @@ TCase *argv_tcase(void) {
   tcase_add_test(tc, test_argv_parse_partially_argv_ok);
   tcase_add_test(tc, test_argv_parse_partially_values);
   tcase_add_test(tc, test_argv_parse_partially_unexpected_token);
+  tcase_add_test(tc, test_argv_usage_print);
   return tc;
 }
 
