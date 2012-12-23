@@ -64,7 +64,7 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
   int pos, expect_no_more_parameters = -1;
   unsigned char expect_value = 0;
   unsigned char is_param;
-  cmd_option *current_option;
+  cmd_option *current_option = NULL;
   argv_option_iterate_reset(args);
 
   args->programname = programname;
@@ -74,7 +74,7 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
     length = strlen(current);
     is_param = is_parameter(current, length);
 
-    if(!is_param && !expect_value) {
+    if(!is_param && !expect_value && expect_no_more_parameters < 0) {
       expect_no_more_parameters = pos;
     }
 
@@ -82,13 +82,18 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
       return ARGV_VALUE_EXPECTED;
     }
 
-    if(is_param) {
+    if(!is_param && expect_value) {
+      current_option->value = current;
+      expect_value = 0;
+    }
+
+    if(is_param && !expect_value) {
       if(expect_no_more_parameters > 0) {
         return ARGV_UNEXPECTED_TOKEN;
       }
       current_option = NULL;
       if(is_end_of_parameters(current, length)) {
-        expect_no_more_parameters = pos;
+        expect_no_more_parameters = pos + 1;
         break;
       }
       argv_option_iterate_reset(args);
@@ -110,15 +115,12 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
       } else {
         expect_value = argv_option_needs_value(current_option);
       }
-    } else {
-      option->value = current;
-      expect_value = 0;
     }
   }
 
-  if(expect_no_more_parameters >= 0) {
+  if(expect_no_more_parameters >= 0 && expect_no_more_parameters < argc) {
     args->values = &argv[expect_no_more_parameters];
-    args->num_values = expect_no_more_parameters - (pos + 1);
+    args->num_values = argc - expect_no_more_parameters;
   } else {
     args->values = NULL;
     args->num_values = 0;

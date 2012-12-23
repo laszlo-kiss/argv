@@ -47,12 +47,51 @@ START_TEST(test_argv_option_iterate) {
 END_TEST
 
 START_TEST(test_argv_parse_partially_argv_ok) {
-  char *str_args[] = {
+  const char *str_args[] = {
     "-v",
     "-f",
     "file.txt",
   };
   fail_unless(ARGV_OK == argv_parse_partially(args, "testprogram", 3, str_args), "argv_parse_partially parses correct arguements correctly");
+} END_TEST
+
+START_TEST(test_argv_parse_partially_values) {
+  const char *str_args[] = {
+    "value1",
+    "value2",
+  };
+  size_t num_values;
+  const char **values;
+  fail_unless(ARGV_OK == argv_parse_partially(args, "testprogram", 0, str_args), "argv_parse_partially parses values correct when none given");
+  values = argv_values(args, &num_values);
+  ck_assert(values == NULL);
+  ck_assert(num_values == 0);
+
+  fail_unless(ARGV_OK == argv_parse_partially(args, "testprogram", 1, str_args), "argv_parse_partially parses values correct when one given");
+  values = argv_values(args, &num_values);
+  ck_assert(values != NULL);
+  ck_assert(strcmp(values[0], "value1") == 0);
+  ck_assert(num_values == 1);
+
+  fail_unless(ARGV_OK == argv_parse_partially(args, "testprogram", 2, str_args), "argv_parse_partially parses values correct when two given");
+  values = argv_values(args, &num_values);
+  ck_assert(values != NULL);
+  ck_assert(strcmp(values[0], "value1") == 0);
+  ck_assert(strcmp(values[1], "value2") == 0);
+  ck_assert(num_values == 2);
+} END_TEST
+
+START_TEST(test_argv_parse_partially_unexpected_token) {
+  const char *str_args[] = {
+    "-v",
+    "-f",
+    "file.txt",
+    "random-token",
+    "-o",
+    "value"
+  };
+  fail_unless(ARGV_UNEXPECTED_TOKEN == argv_parse_partially(args, "testprogram", 6, str_args), "argv_parse_partially returns UNEXPECTED_TOKEN");
+  fail_unless(ARGV_UNEXPECTED_TOKEN == argv_parse_partially(args, "testprogram", 5, str_args), "argv_parse_partially returns UNEXPECTED_TOKEN");
 } END_TEST
 
 TCase *argv_tcase(void) {
@@ -61,6 +100,8 @@ TCase *argv_tcase(void) {
   tcase_add_test(tc, test_argv_init);
   tcase_add_test(tc, test_argv_option_iterate);
   tcase_add_test(tc, test_argv_parse_partially_argv_ok);
+  tcase_add_test(tc, test_argv_parse_partially_values);
+  tcase_add_test(tc, test_argv_parse_partially_unexpected_token);
   return tc;
 }
 
