@@ -102,12 +102,8 @@ START_TEST(test_argv_usage_print) {
   argv_option_set_description(verbose_option, "be more verbose");
   argv_option_set_description(file_option, "name of the input file");
   argv_option_set_description(output_option, "name of the output file");
-  char *buffer[1024] = {};
-  FILE *handle = fmemopen(buffer, 1024, "a");
   argv_parse_partially(args, "program", 0, NULL);
-  argv_help_print_to(args, handle);
   argv_help_print(args);
-  fclose(handle);
 } END_TEST
 
 TCase *argv_tcase(void) {

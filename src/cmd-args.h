@@ -4,11 +4,13 @@
 #include <stddef.h>
 
 struct cmd_args {
+  const char *programname;
   cmd_option **options;
   const char **values;
-  const char *programname;
+  char **errors;
   size_t num_options;
   size_t num_values;
+  size_t num_errors;
   size_t pos;
   size_t values_pos;
 };

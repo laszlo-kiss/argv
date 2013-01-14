@@ -109,4 +109,8 @@ const char *argv_values_iterate(cmd_args *args);
  */
 void argv_values_iterate_reset(cmd_args *args);
 
+char **argv_errors(cmd_args *args);
+void argv_clear_errors(cmd_args *args);
+void argv_add_error(cmd_args *args, char *error);
+
 #endif /* ARGV_ARGV_H */
