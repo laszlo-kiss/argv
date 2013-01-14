@@ -78,7 +78,7 @@ static unsigned char is_end_of_parameters(const char *value, int length) {
   return length == 2 && value[0] == '-' && value[1] == '-' ? 1 : 0;
 }
 
-static cmd_option *find_option(cmd_args *args, const char *current int length, unsigned is_shortname) {
+static cmd_option *find_option(cmd_args *args, const char *current, int length, unsigned is_shortname) {
   cmd_option *option;
   argv_option_iterate_reset(args);
   while(NULL != (option = argv_option_iterate(args))) {
@@ -91,11 +91,11 @@ static cmd_option *find_option(cmd_args *args, const char *current int length, u
   return NULL;
 }
 
-static cmd_option *find_option_by_longname(cmd_args *args, const char *current int length) {
+static cmd_option *find_option_by_longname(cmd_args *args, const char *current, int length) {
   return find_option(args, current, length, 0);
 }
 
-static cmd_option *find_option_by_shortname(cmd_args *args, const char *current int length) {
+static cmd_option *find_option_by_shortname(cmd_args *args, const char *current, int length) {
   return find_option(args, current, length, 1);
 }
 
@@ -127,6 +127,7 @@ static char parse_argv_tokens(cmd_args *args, int new_argc, const char **new_arg
         *parsed_value = current + valueposition + 1;
         valueposition = 0;
         position++;
+        return 1;
       } else {
         valueposition = pos;
         option = find_option_by_longname(args, current, length - pos);
@@ -141,6 +142,7 @@ static char parse_argv_tokens(cmd_args *args, int new_argc, const char **new_arg
         *parsed_value = current + subposition;
         valueposition = 0;
         position++;
+        return 1;
       } else {
         option = find_option_by_shortname(args, current + subposition, 1);
         if(option == NULL) {
@@ -175,69 +177,30 @@ int argv_parse(cmd_args *args, int argc, const char **argv) {
 }
 
 int argv_parse_partially(cmd_args *args, const char *programname, int argc, const char **argv) {
-  cmd_option *option;  
-  int pos, expect_no_more_parameters = -1;
+  cmd_option *option, *new_option;  
+  int ret;
   unsigned char expect_value = 0;
-  unsigned char is_param;
-  cmd_option *current_option = NULL;
-  argv_option_iterate_reset(args);
+  const char *value;
 
   args->programname = programname;
 
-  for(pos = 0; pos < argc; pos++) {
-    current = argv[pos];
-    is_param = is_parameter(current, length);
-
-    if(!is_param && !expect_value && expect_no_more_parameters < 0) {
-      expect_no_more_parameters = pos;
-    }
-
-    if(is_param && expect_value) {
-      return ARGV_VALUE_EXPECTED;
-    }
-
-    if(!is_param && expect_value) {
-      current_option->value = current;
-      expect_value = 0;
-    }
-
-    if(is_param && !expect_value) {
-      if(expect_no_more_parameters > 0) {
+  while((ret = parse_argv_tokens(args, argc, argv, &new_option, &value)) > 0) {
+    /* found a parameter */
+    if(ret) {
+      if(expect_value) {
+        /* @TOOD: add an error message */
+        return ARGV_VALUE_EXPECTED;
+      }
+      option = new_option;
+      expect_value = argv_option_needs_value(option);
+    /* found a value */
+    } else {
+      if(!expect_value) {
         return ARGV_UNEXPECTED_TOKEN;
       }
-      current_option = NULL;
-      if(is_end_of_parameters(current, length)) {
-        expect_no_more_parameters = pos + 1;
-        break;
-      }
-      argv_option_iterate_reset(args);
-      while(NULL != (option = argv_option_iterate(args))) {
-        if((is_long_parameter(current, length)
-            && option->longname != NULL
-            && strncmp(current + 2, option->longname, length - 2) == 0
-          ) || (
-            option->shortname != '\0'
-            && length == 2
-            && current[1] == option->shortname
-          )) {
-          current_option = option;
-          break;
-        }
-      }
-      if(current_option == NULL) {
-        return ARGV_UNDEFINED_PARAMETER;
-      } else {
-        expect_value = argv_option_needs_value(current_option);
-      }
+      option->value = value;
+      expect_value = 0;
     }
-  }
-
-  if(expect_no_more_parameters >= 0 && expect_no_more_parameters < argc) {
-    args->values = &argv[expect_no_more_parameters];
-    args->num_values = argc - expect_no_more_parameters;
-  } else {
-    args->values = NULL;
-    args->num_values = 0;
   }
 
   return ARGV_OK;
@@ -267,7 +230,7 @@ char **argv_errors(cmd_args *args) {
 void argv_clear_errors(cmd_args *args) {
   free(args->errors);
   args->errors = NULL;
-  args->num_errors;
+  args->num_errors = 0;
 }
 
 void argv_add_error(cmd_args *args, char *error) {

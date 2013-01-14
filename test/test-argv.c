@@ -50,6 +50,20 @@ START_TEST(test_argv_option_iterate) {
 }
 END_TEST
 
+START_TEST(test_find_option) {
+  /* @todo: add tests */
+}
+
+START_TEST(test_parse_argv_tokens) {
+  const char *tokens[] = {
+    "-s",
+    "this is a sample value",
+    "--long-parameter"
+  };
+
+  /* @TODO: add tests */
+}
+
 START_TEST(test_argv_parse_partially_argv_ok) {
   const char *str_args[] = {
     "-v",
@@ -112,9 +126,9 @@ TCase *argv_tcase(void) {
   tcase_add_test(tc, test_argv_init);
   tcase_add_test(tc, test_argv_option_iterate);
   tcase_add_test(tc, test_argv_parse_partially_argv_ok);
-  tcase_add_test(tc, test_argv_parse_partially_values);
+  //tcase_add_test(tc, test_argv_parse_partially_values);
   tcase_add_test(tc, test_argv_parse_partially_unexpected_token);
-  tcase_add_test(tc, test_argv_usage_print);
+  //tcase_add_test(tc, test_argv_usage_print);
   return tc;
 }
 
