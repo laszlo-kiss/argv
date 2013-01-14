@@ -66,6 +66,10 @@ int argv_parse(cmd_args *args, int argc, const char **argv);
  */
 int argv_parse_partially(cmd_args *args, const char *programname, int argc, const char **argv);
 
+cmd_option *argv_find_option_by_longname(cmd_args *args, const char *current, int length);
+cmd_option *argv_find_option_by_shortname(cmd_args *args,  char current);
+char argv_parse_tokens(cmd_args *args, int new_argc, const char **new_argv, cmd_option **parsed_option, const char **parsed_value);
+
 /**
  * iterate over all options added using argv_option_register()
  *

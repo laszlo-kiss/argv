@@ -84,22 +84,23 @@ static cmd_option *find_option(cmd_args *args, const char *current, int length, 
   while(NULL != (option = argv_option_iterate(args))) {
     if((is_shortname
         && (option->shortname != '\0' && current[0] == option->shortname))
-        || (option->longname != NULL && strncmp(current + 2, option->longname, length) == 0)) {
+        || (option->longname != NULL && strncmp(current, option->longname, length) == 0)) {
       return option;
     }
   }
   return NULL;
 }
 
-static cmd_option *find_option_by_longname(cmd_args *args, const char *current, int length) {
+cmd_option *argv_find_option_by_longname(cmd_args *args, const char *current, int length) {
   return find_option(args, current, length, 0);
 }
 
-static cmd_option *find_option_by_shortname(cmd_args *args, const char *current, int length) {
-  return find_option(args, current, length, 1);
+cmd_option *argv_find_option_by_shortname(cmd_args *args,  char current) {
+  const char *c = &current;
+  return find_option(args, c, 1, 1);
 }
 
-static char parse_argv_tokens(cmd_args *args, int new_argc, const char **new_argv, cmd_option **parsed_option, const char **parsed_value) {
+char argv_parse_tokens(cmd_args *args, int new_argc, const char **new_argv, cmd_option **parsed_option, const char **parsed_value) {
   static const char **argv = NULL;
   static int argc = 0;
   static int position = 0;
@@ -130,7 +131,7 @@ static char parse_argv_tokens(cmd_args *args, int new_argc, const char **new_arg
         return 1;
       } else {
         valueposition = pos;
-        option = find_option_by_longname(args, current, length - pos);
+        option = argv_find_option_by_longname(args, current + 2, length - pos);
         // no parameter found
         if(option == NULL) return -1;
         *parsed_option = option;
@@ -144,7 +145,7 @@ static char parse_argv_tokens(cmd_args *args, int new_argc, const char **new_arg
         position++;
         return 1;
       } else {
-        option = find_option_by_shortname(args, current + subposition, 1);
+        option = argv_find_option_by_shortname(args, *(current + subposition));
         if(option == NULL) {
           return -1;
         } else {
@@ -184,7 +185,7 @@ int argv_parse_partially(cmd_args *args, const char *programname, int argc, cons
 
   args->programname = programname;
 
-  while((ret = parse_argv_tokens(args, argc, argv, &new_option, &value)) > 0) {
+  while((ret = argv_parse_tokens(args, argc, argv, &new_option, &value)) > 0) {
     /* found a parameter */
     if(ret) {
       if(expect_value) {
