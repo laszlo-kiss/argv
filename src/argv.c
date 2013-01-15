@@ -61,11 +61,10 @@ static unsigned char is_long_parameter(const char *value, int length) {
 static int is_long_parameter_with_value(const char *value, int length) {
   if(!is_long_parameter(value, length)) return 0;
 
-  int pos = 2;
-  unsigned char contains = 0;
+  int pos;
+  unsigned char contains;
 
-
-  while(pos < length && !contains) {
+  for(pos = 2, contains = 0; pos < length && !contains; pos++) {
     if(value[pos] == '=') {
       contains = 1;
     }
