@@ -50,19 +50,60 @@ START_TEST(test_argv_option_iterate) {
 }
 END_TEST
 
-START_TEST(test_find_option) {
-  /* @todo: add tests */
-}
+
+START_TEST(test_find_option_by_longname) {
+  fail_unless(file_option == argv_find_option_by_longname(args, "file", strlen("file")));
+  fail_unless(output_option == argv_find_option_by_longname(args, "output", strlen("output")));
+} END_TEST
+
+START_TEST(test_find_option_by_shortname) {
+  fail_unless(verbose_option == argv_find_option_by_shortname(args, 'v'));
+} END_TEST
 
 START_TEST(test_parse_argv_tokens) {
   const char *tokens[] = {
-    "-s",
+    "-v",
     "this is a sample value",
-    "--long-parameter"
+    "--output",
+    "--file",
+    "stopa rouge regime"
   };
+  const int argc = 4;
+  cmd_option *option;
+  const char *value = NULL;
 
-  /* @TODO: add tests */
-}
+  /* a short option -v */
+  fail_unless(0 == argv_parse_tokens(args, argc, tokens, &option, &value));
+  fail_unless(verbose_option == option);
+  fail_unless(value == NULL);
+
+  /* an value */
+  option = NULL;
+  fail_unless(1 == argv_parse_tokens(args, argc, tokens, &option, &value));
+  fail_unless(NULL == option);
+  fail_unless(value != NULL && strcmp(value, "this is a sample value") == 0);
+
+  /* a long parameter */
+  value = NULL;
+  fail_unless(0 == argv_parse_tokens(args, argc, tokens, &option, &value));
+  fail_unless(output_option == option);
+  fail_unless(value == NULL);
+
+  /* a long parameter with value */
+  option = NULL;
+  int ret = argv_parse_tokens(args, argc, tokens, &option, &value);
+  printf("RET: %i\n", ret);
+  fail_unless(0 == ret);
+  fail_unless(file_option == option);
+  fail_unless(value == NULL);
+
+  /* the value of the long parameter */
+  value = NULL;
+  fail_unless(1 == argv_parse_tokens(args, argc, tokens, &option, &value));
+  fail_unless(NULL == option);
+  fail_unless(value != NULL && strcmp(value, "file.txt") == 0);
+
+} END_TEST
 
 START_TEST(test_argv_parse_partially_argv_ok) {
   const char *str_args[] = {
@@ -126,8 +167,11 @@ TCase *argv_tcase(void) {
   tcase_add_test(tc, test_argv_init);
   tcase_add_test(tc, test_argv_option_iterate);
   tcase_add_test(tc, test_argv_parse_partially_argv_ok);
-  //tcase_add_test(tc, test_argv_parse_partially_values);
   tcase_add_test(tc, test_argv_parse_partially_unexpected_token);
+  tcase_add_test(tc, test_find_option_by_shortname);
+  tcase_add_test(tc, test_find_option_by_longname);
+  tcase_add_test(tc, test_parse_argv_tokens);
+  //tcase_add_test(tc, test_argv_parse_partially_values);
   //tcase_add_test(tc, test_argv_usage_print);
   return tc;
 }

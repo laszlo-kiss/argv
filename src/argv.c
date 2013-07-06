@@ -81,9 +81,9 @@ static cmd_option *find_option(cmd_args *args, const char *current, int length, 
   cmd_option *option;
   argv_option_iterate_reset(args);
   while(NULL != (option = argv_option_iterate(args))) {
-    if((is_shortname
-        && (option->shortname != '\0' && current[0] == option->shortname))
-        || (option->longname != NULL && strncmp(current, option->longname, length) == 0)) {
+    if(is_shortname
+        ? option->shortname != '\0' && current[0] == option->shortname
+        : option->longname != NULL && strncmp(current, option->longname, length) == 0) {
       return option;
     }
   }
@@ -106,7 +106,7 @@ char argv_parse_tokens(cmd_args *args, int new_argc, const char **new_argv, cmd_
   static int valueposition = 0;
   static int subposition = 0;
 
-  if(new_argc > 0 && new_argv != NULL && new_argv != argv) {
+  if(new_argc > 0 && new_argv != NULL && (new_argv != argv || new_argc != argc)) {
     argv = new_argv;
     argc = new_argc;
     position = 0;
@@ -114,23 +114,31 @@ char argv_parse_tokens(cmd_args *args, int new_argc, const char **new_argv, cmd_
     valueposition = 0;
   }
 
+  *parsed_option = NULL;
+  *parsed_value = NULL;
+
   if(position >= argc) return -1;
 
+  printf("POSITION: %i, ARGC: %i\n", position, argc);
   const char *current = argv[position];
-  int length = strlen(current);
   int pos;
+  int length = strlen(current);
   cmd_option *option;
 
   if(is_parameter(current, length)) {
     if(is_long_parameter(current, length)) {
-      if((pos = is_long_parameter_with_value(current, length)) && valueposition) {
+      pos = is_long_parameter_with_value(current, length);
+      if(valueposition) {
         *parsed_value = current + valueposition + 1;
         valueposition = 0;
         position++;
         return 1;
       } else {
         valueposition = pos;
-        option = argv_find_option_by_longname(args, current + 2, length - pos);
+        if(pos == 0) {
+          position++;
+        }
+        option = argv_find_option_by_longname(args, current + 2, length - 2 - pos);
         // no parameter found
         if(option == NULL) return -1;
         *parsed_option = option;
